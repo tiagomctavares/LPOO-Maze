@@ -33,10 +33,10 @@ public class main {
 	
 	public static void main(String[] args) {
 		// Se random gera aleatoriamente
-		init_map = generateMaze(10);
+		//init_map = generateMaze(10); NEEDS ENTITY PLACEMENT BEFORE WORKING (DRAGON, WEAPON, etc)
 		int[] hero_loc = findHero(init_map);
 		Scanner keyboard = new Scanner(System.in);
-		for (int n = 0; n < 28; n++) {
+		while (true) {
 			display(init_map);
 			char movement = keyboard.next().charAt(0);
 			move(movement, hero_loc);
@@ -69,92 +69,56 @@ public class main {
 			return "wall";
 		else if ((init_map[hero_loc[0]][hero_loc[1]] & sword) == BIT(3))
 			return "sword";
-		else if ((init_map[hero_loc[0]][hero_loc[1]] & exit) == (BIT(2) ^ BIT(4)))
+		else if ((init_map[hero_loc[0]][hero_loc[1]] & exit) == BIT(2))
 			return "exit";
 		else return "empty";
 	}
 	
 	private static void winGame() {
 		System.out.println("You won!");
+		System.exit(0);
 	}
 	
 	private static void move(char movement, int[] hero_loc) {
 		String col_detect;
-		switch(movement) {
+		int dy, dx;
+		dy = dx = 0;
+		switch (movement) {
 		case 'a': //left
-			hero_loc[1] -= 1;
-			col_detect = collision(hero_loc);
-			if (col_detect == "wall") {
-				hero_loc[1] +=1;
-			}
-			else if (col_detect == "sword") {
-				init_map[hero_loc[0]][hero_loc[1]] = BIT(4);
-				init_map[hero_loc[0]][hero_loc[1] + 1] = empty;
-			}
-			else if (col_detect == "empty") {
-				init_map[hero_loc[0]][hero_loc[1]] = init_map[hero_loc[0]][hero_loc[1] + 1];
-				init_map[hero_loc[0]][hero_loc[1] + 1] = empty;
-			}
-			else if (col_detect == "exit") {
-				winGame();
-			}
+			dx--;
 			break;
 		case 'd': //right
-			hero_loc[1] += 1;
-			col_detect = collision(hero_loc);
-			if (col_detect == "wall") {
-				hero_loc[1] -=1;
-			}
-			else if (col_detect == "sword") {
-				init_map[hero_loc[0]][hero_loc[1]] = BIT(4);
-				init_map[hero_loc[0]][hero_loc[1] - 1] = empty;
-			}
-			else if (col_detect == "empty") {
-				init_map[hero_loc[0]][hero_loc[1]] = init_map[hero_loc[0]][hero_loc[1] - 1];
-				init_map[hero_loc[0]][hero_loc[1] - 1] = empty;
-			}
-			else if (col_detect == "exit") {
-				winGame();
-			}
+			dx++;
 			break;
 		case 'w': //up
-			hero_loc[0] -= 1;
-			col_detect = collision(hero_loc);
-			if (col_detect == "wall") {
-				hero_loc[0] +=1;
-			}
-			else if (col_detect == "sword") {
-				init_map[hero_loc[0]][hero_loc[1]] = BIT(4);
-				init_map[hero_loc[0] + 1][hero_loc[1]] = empty;
-			}
-			else if (col_detect == "empty") {
-				init_map[hero_loc[0]][hero_loc[1]] = init_map[hero_loc[0] + 1][hero_loc[1]];
-				init_map[hero_loc[0] + 1][hero_loc[1]] = empty;
-			}
-			else if (col_detect == "exit") {
-				winGame();
-			}
+			dy--;
 			break;
 		case 's': //down
-			hero_loc[0] += 1;
-			col_detect = collision(hero_loc);
-			if (col_detect == "wall") {
-				hero_loc[0] -=1;
-			}
-			else if (col_detect == "sword") {
-				init_map[hero_loc[0]][hero_loc[1]] = BIT(4);
-				init_map[hero_loc[0] - 1][hero_loc[1]] = empty;
-			}
-			else if (col_detect == "empty") {
-				init_map[hero_loc[0]][hero_loc[1]] = init_map[hero_loc[0] - 1][hero_loc[1]];
-				init_map[hero_loc[0] - 1][hero_loc[1]] = empty;
-			}
-			else if (col_detect == "exit") {
-				winGame();
-			}
+			dy++;
 			break;
-		default:
-				break;
+		}
+		hero_loc[0] += dy;
+		hero_loc[1] += dx;
+		col_detect = collision(hero_loc);
+		if (col_detect == "wall") {
+			hero_loc[0] -= dy;
+			hero_loc[1] -= dx;
+		}
+		else if (col_detect == "sword") {
+			init_map[hero_loc[0]][hero_loc[1]] = BIT(4);
+			init_map[hero_loc[0] - dy][hero_loc[1] - dx] = empty;
+		}
+		else if (col_detect == "empty") {
+			init_map[hero_loc[0]][hero_loc[1]] = init_map[hero_loc[0] - dy][hero_loc[1] - dx]; //Copy previous state
+			init_map[hero_loc[0] - dy][hero_loc[1] - dx] = empty;
+		}
+		else if (col_detect == "exit") {
+			if (init_map[hero_loc[0] - dy][hero_loc[1] - dx] == BIT(4))
+				winGame();
+			else {
+				hero_loc[0] -= dy;
+				hero_loc[1] -= dx;
+			}
 		}
 	}
 	
@@ -173,7 +137,7 @@ public class main {
 					System.out.print("A");
 				else System.out.print(" ");
 				
-				// 1 MORE SPACE
+				//Evens the display so it looks like a square maze
 				System.out.print(" ");
 			}
 			System.out.println();
