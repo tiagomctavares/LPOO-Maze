@@ -1,9 +1,9 @@
-package LPOO.src;
+package maze.logic;
 
 import java.util.Arrays;
-import java.util.Scanner;
-import java.lang.String;
 import java.util.Random;
+import java.util.Scanner;
+import maze.cli.cli;
 
 //BIT 0 -> Wall
 //BIT 1 -> Hero
@@ -39,7 +39,7 @@ public class main {
 		int[] dragon_loc = findEntity("dragon", init_map);
 		Scanner keyboard = new Scanner(System.in);
 		while (true) {
-			display(init_map);
+			cli.display(init_map);
 			char movement = keyboard.next().charAt(0);
 			move(movement, hero_loc);
 			if (dragonAlive)
@@ -125,13 +125,13 @@ public class main {
 	}
 
 	private static void loseGame() {
-		display(init_map);
+		cli.display(init_map);
 		System.out.println("Dragon says: great meal!");
 		System.exit(0);
 	}
 
 	private static void winGame() {
-		display(init_map);
+		cli.display(init_map);
 		System.out.println("You won!");
 		System.exit(0);
 	}
@@ -216,31 +216,7 @@ public class main {
 		}
 	}
 
-	private static  void display(int[][] maze) {
-		for (int i = 0; i < maze.length; i++) {
-			for (int j = 0; j < maze[i].length; j++) {
-				if ((maze[i][j] & wall) == BIT(0))
-					System.out.print("X");
-				else if ((maze[i][j] & (dragon | sword)) == (BIT(3) | BIT(5)))
-						System.out.print("F");
-				else if ((maze[i][j] & dragon) == BIT(5))
-					System.out.print("D");
-				else if ((maze[i][j] & hero) == BIT(1))
-					System.out.print("H");
-				else if ((maze[i][j] & exit) == BIT(2))
-					System.out.print("S");
-				else if ((maze[i][j] & sword) == BIT(3))
-					System.out.print("E");
-				else if ((maze[i][j] & armed) == BIT(4))
-					System.out.print("A");
-				else System.out.print(" ");
 
-				//Evens the display so it looks like a square maze
-				System.out.print(" ");
-			}
-			System.out.println();
-		}
-	}
 
 
 	///////////////////////////// MAP GENERATOR /////////////////////////////////////
