@@ -6,4 +6,8 @@ public class Sword extends Symbol {
 		super(Helper.BIT(3), x, y);
 	}
 	
+	public void GrabSword() {
+		super.setActive(false);
+	}
+	
 }
