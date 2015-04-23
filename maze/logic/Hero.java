@@ -1,5 +1,4 @@
-package maze;
-import maze.Sword;
+package logic;
 
 public class Hero extends Symbol {
 	private boolean armed = false;

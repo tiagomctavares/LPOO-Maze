@@ -1,4 +1,4 @@
-package maze;
+package logic;
 
 public class Sword extends Symbol {
 

@@ -1,10 +1,7 @@
-package maze;
-
-import java.util.Arrays;
+package logic;
 import java.util.Random;
 import java.util.Scanner;
-import maze.cli;
-import maze.mazeGenerator;
+import cli.cli;
 
 //BIT 0 -> Wall
 //BIT 1 -> Hero

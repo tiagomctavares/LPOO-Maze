@@ -1,4 +1,4 @@
-package maze;
+package logic;
 
 public abstract class Symbol {
 	private int symbol;

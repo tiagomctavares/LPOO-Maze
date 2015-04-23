@@ -1,4 +1,6 @@
-package maze;
+package cli;
+import global.Helper;
+import logic.Logic;
 
 public class cli {
 	public cli() {

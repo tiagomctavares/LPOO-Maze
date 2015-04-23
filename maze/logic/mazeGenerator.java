@@ -1,8 +1,8 @@
-package maze;
+package logic;
 
 import java.util.Arrays;
 import java.util.Random;
-import maze.Helper;
+import global.Helper;
 
 public class mazeGenerator {
 

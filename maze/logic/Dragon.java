@@ -1,5 +1,4 @@
-package maze;
-import maze.Sword;
+package logic;
 
 public class Dragon extends Symbol {
 
