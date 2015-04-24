@@ -3,7 +3,7 @@ package logic;
 public class Dragon extends Symbol {
 
 	public Dragon(int x, int y) {
-		super(Helper.BIT(5), x, y);
+		super('D', x, y);
 	}
 	
 	public boolean move(int x, int y) {
@@ -19,6 +19,16 @@ public class Dragon extends Symbol {
 			return (sword.isActive() && this.getX() == sword.getX() && this.getY() == sword.getY());
 		}
 		
-		return false;		
+		return false;
 	}
+	
+	public boolean isDead() {
+		return !super.isActive();
+	}
+	
+	public void die() {
+		super.setActive(false);
+	}
+	
+	
 }

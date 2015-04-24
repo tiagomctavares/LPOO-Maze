@@ -11,54 +11,40 @@ import cli.cli;
 //BIT 5 -> Dragon
 
 public class Logic {
-	private static boolean dragonAlive = true;
-	private static int empty = 0;
-	private static int wall = BIT(0);
-	// private static int hero = BIT(1);
-	private static int exit = BIT(2);
-	// private static int sword = BIT(3);
-	private static int armed = BIT(4);
-	private static int dragon = BIT(5);
-	private static int[][] init_map;
-	public static Hero hero;
-	public static Sword sword;
-
-	public static void main(String[] args) {
-		boolean defaultMaze = true; 
-		mazeGenerator maze = new mazeGenerator();
+	public Maze maze;
+	public Dragon dragon;
+	public Hero hero;
+	public Sword sword;
+	// 1-> Win 2-> Loose  
+	private int gameOver;
+	
+	public Logic(boolean defaultMaze) {
+		maze = new Maze();
+		gameOver = 0;
 		
 		if(defaultMaze) {
-			init_map = maze.generateMap(!defaultMaze, 10);
+			maze.generateMap(!defaultMaze, 10);
 			hero = new Hero(1, 1);
 			sword = new Sword(8, 1);
-			// init_map[1][1] = hero;
-			init_map[3][1] = dragon;
-			// init_map[8][1] = sword;
+			dragon = new Dragon(3, 1);
 		} else {
-			init_map = maze.generateMap(defaultMaze, 10); 
-		}
-		
-		Scanner keyboard = new Scanner(System.in);
-		// int[] hero_loc = findEntity("hero", init_map);
-		int[] dragon_loc = findEntity("dragon", init_map);
-		
-		while (true) {
-			cli.display(init_map);
-			char movement = keyboard.next().charAt(0);
-			move(movement);
-			if (dragonAlive)
-				moveDragon(dragon_loc);
-			checkDragon();
+			maze.generateMap(defaultMaze, 10); 
 		}
 	}
-
-	private static int BIT(int n) {
-		int shifted;
-		shifted = 1 << n;
-		return shifted;
+	
+	public void play(char movement) {
+		moveHero(movement);
+		
+		if (!dragon.isDead()) {
+			moveDragon();
+		}
+		
+		checkDragon();
 	}
 
-	private static void checkDragon() {
+	
+
+	private void checkDragon() {
 		int[] hero_loc = hero.getPosition();
 		
 		String col_detect;
@@ -84,8 +70,7 @@ public class Logic {
 			col_detect = collision(hero_loc);
 			if (col_detect == "dragon") {
 				if (hero.isArmed()) {
-					init_map[hero_loc[0]][hero_loc[1]] = empty;
-					dragonAlive = false;
+					dragon.die();
 				} else loseGame();
 			}
 			hero_loc[0] -= dy;
@@ -95,72 +80,59 @@ public class Logic {
 		}
 	}
 
-	private static int[] findEntity(String entity, int[][] maze) {
-		int[] loc = new int[2];
-		search:
-			for (int i = 0; i < maze.length; i++) {
-				for (int j = 0; j < maze[i].length; j++) {
-					switch (entity) {
-					/*case "hero":
-						if ((maze[i][j] & hero) == BIT(1)) {
-							loc[0] = i;
-							loc[1] = j;
-							break search;
-						}*/
-					case "dragon":
-						if ((maze[i][j] & dragon) == BIT(5)) {
-							loc[0] = i;
-							loc[1] = j;
-							break search;
-						}
-					}
-
-				}
-			}
-		return loc;
-	}
-
-	private static String dragonCollision(int[] hero_loc) {
-		if ((init_map[hero_loc[0]][hero_loc[1]] & wall) == BIT(0))
+	private String dragonCollision(int[] dragon_loc) {
+		if (maze.map[dragon_loc[0]][dragon_loc[1]] == maze.wall)
 			return "wall";
-		else if ((init_map[hero_loc[0]][hero_loc[1]] & dragon) == BIT(5))
-			return "dragon";
-		else if (hero_loc[0] == sword.getX() && hero_loc[1] == sword.getY())
+		else if (dragon_loc[0] == sword.getX() && dragon_loc[1] == sword.getY())
 			return "sword";
-		else if ((init_map[hero_loc[0]][hero_loc[1]] & exit) == BIT(2))
+		else if (maze.map[dragon_loc[0]][dragon_loc[1]] == maze.exit)
 			return "exit";
+		
 		else return "empty";
 	}
 
-	private static String collision(int[] hero_loc) {
-		if ((init_map[hero_loc[0]][hero_loc[1]] & wall) == BIT(0))
+	private String collision(int[] hero_loc) {
+		
+		if (maze.map[hero_loc[0]][hero_loc[1]] == maze.wall)
 			return "wall";
-		else if ((init_map[hero_loc[0]][hero_loc[1]] & dragon) == BIT(5))
+		else if (hero_loc[0] == dragon.getX() && hero_loc[1] == dragon.getY())
 			return "dragon";
 		else if (hero.samePosition(sword.getPosition()))
 			return "sword";
-		else if ((init_map[hero_loc[0]][hero_loc[1]] & exit) == BIT(2))
+		else if (maze.map[hero_loc[0]][hero_loc[1]] == maze.exit)
 			return "exit";
 		else return "empty";
 	}
-
-	private static void loseGame() {
-		cli.display(init_map);
-		System.out.println("Dragon says: great meal!");
-		System.exit(0);
+	
+	public boolean gameEnded() {
+		if(gameOver == 0)
+			return false;
+		return true;
+	}
+	
+	public boolean hasWin() {
+		if(gameOver == 2)
+			return false;
+		else
+			return true;
 	}
 
-	private static void winGame() {
-		cli.display(init_map);
-		System.out.println("You won!");
-		System.exit(0);
+	private void loseGame() {
+		cli.display(maze.map);
+		gameOver = 2;
 	}
 
-	private static void moveDragon(int[] dragon_loc) {
+	private void winGame() {
+		cli.display(maze.map);
+		gameOver = 1;
+	}
+
+	private void moveDragon() {
+		int[] dragon_loc = dragon.getPosition();
+		int movement = Helper.randInt(0, 4);
 		String col_detect;
 		int dy, dx;
 		dy = dx = 0;
-		int movement = randInt(0, 4);
 		switch (movement) {
 		case 0: //left
 			dx--;
@@ -179,21 +151,18 @@ public class Logic {
 		}
 		dragon_loc[0] += dy;
 		dragon_loc[1] += dx;
+		
 		col_detect = dragonCollision(dragon_loc);
-		if (col_detect == "sword") {
-			init_map[dragon_loc[0]][dragon_loc[1]] |= BIT(5);
-			init_map[dragon_loc[0] - dy][dragon_loc[1] - dx] = empty;
-		} 
-		else if (col_detect == "empty") {
-			init_map[dragon_loc[0]][dragon_loc[1]] |= BIT(5);
-			init_map[dragon_loc[0] - dy][dragon_loc[1] - dx] ^= BIT(5);
+		
+		if (col_detect == "sword" || col_detect == "empty") {
+			dragon.move(dragon_loc[0], dragon_loc[1]);
 		} else {
 			dragon_loc[0] -= dy;
 			dragon_loc[1] -= dx;
 		}
 	}
 
-	private static void move(char movement) {
+	private void moveHero(char movement) {
 		int hero_loc[] = hero.getPosition();
 		
 		String col_detect;
@@ -221,15 +190,13 @@ public class Logic {
 			hero_loc[1] -= dx;
 		}
 		else if (col_detect == "sword") {
-			// init_map[hero_loc[0]][hero_loc[1]] = BIT(4);
-			// init_map[hero_loc[0] - dy][hero_loc[1] - dx] = empty;
 			hero.setArmed();
 			sword.setActive(false);
 		}
-		else if (col_detect == "empty") {
+		/*else if (col_detect == "empty") {
 			init_map[hero_loc[0]][hero_loc[1]] = init_map[hero_loc[0] - dy][hero_loc[1] - dx]; //Copy previous state
 			init_map[hero_loc[0] - dy][hero_loc[1] - dx] = empty;
-		}
+		}*/
 		else if (col_detect == "exit") {
 			if (hero.isArmed())
 				winGame();
@@ -240,11 +207,5 @@ public class Logic {
 		}
 		
 		hero.move(hero_loc);
-	}
-	
-	private static int randInt(int min, int max) {
-		Random rand = new Random();
-		int randomNum = rand.nextInt((max - min) + 1) + min;
-		return randomNum;
 	}
 }

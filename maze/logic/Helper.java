@@ -3,11 +3,6 @@ package logic;
 import java.util.Random;
 
 public class Helper {
-	public static int BIT(int n) {
-		int shifted;
-		shifted = 1 << n;
-		return shifted;
-	}
 
 	public static int randInt(int min, int max) {
 		Random rand = new Random();

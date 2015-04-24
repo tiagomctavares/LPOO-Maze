@@ -4,7 +4,7 @@ public class Hero extends Symbol {
 	private boolean armed = false;
 
 	public Hero(int x, int y) {
-		super(Helper.BIT(1), x, y);
+		super('H', x, y);
 	}
 
 	public boolean move(int x, int y) {
@@ -22,6 +22,11 @@ public class Hero extends Symbol {
 
 	public void setArmed() {
 		this.armed = true;
+		super.setSymbol('A');
+	}
+	
+	public char getSymbol() {
+		return super.getSymbol();
 	}
 	
 	

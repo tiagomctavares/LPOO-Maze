@@ -1,11 +1,11 @@
 package logic;
 
 public abstract class Symbol {
-	private int symbol;
+	private char symbol;
 	private int[] position = {0, 0};
 	private boolean active;
 	
-	public Symbol(int symbol, int x, int y) {
+	public Symbol(char symbol, int x, int y) {
 		this.symbol = symbol;
 		setPosition(x, y);
 		active = true;
@@ -23,10 +23,14 @@ public abstract class Symbol {
 		return position[1];
 	}
 	
-	public int getSymbol() {
+	public char getSymbol() {
 		return symbol;
 	}
-
+	
+	public void setSymbol(char newSymbol) {
+		symbol = newSymbol;
+	}
+	
 	protected void setPosition(int x, int y) {
 		position[0] = x;
 		position[1] = y;
@@ -40,11 +44,12 @@ public abstract class Symbol {
 	public void setActive(boolean active) {
 		this.active = active;
 	}
-
+	
+	public boolean samePosition(int x, int y) {
+		return (this.getX() == x && this.getY() == y && active);
+	}
 	
 	public boolean samePosition(int[] position) {
-		if(this.getX() == position[0] && this.getY() == position[1])
-			return true;
-		return false;
+		return samePosition(position[0], position[1]);
 	}
 }

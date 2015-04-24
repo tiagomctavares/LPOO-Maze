@@ -4,23 +4,30 @@ import java.util.Arrays;
 import java.util.Random;
 import global.Helper;
 
-public class mazeGenerator {
+public class Maze {
 
-	private int empty = 0;
-	private int wall = Helper.BIT(0);
-	private int exit = Helper.BIT(2);
+	private char empty = ' ';
+	public char wall;
+	public char exit;
+	public char[][] map;
+	
+	public Maze() {
+		this.wall = 'X';
+		System.out.println("INIT");
+		this.exit = 'E';
+	}
 
-	public int[][] generateMap(boolean random, int number) {
+	public void generateMap(boolean random, int number) {
 	
 		if (random)
-			return generateRandomMaze(number);
+			map = generateRandomMaze(number);
 		else
-			return defaultMaze();
+			map = defaultMaze();
 
 	}
 
-	private int[][] defaultMaze() {
-		int[][] maze = {
+	private char[][] defaultMaze() {
+		char[][] maze = {
 				{ wall, wall, wall, wall, wall, wall, wall, wall, wall, wall },
 				{ wall, empty, empty, empty, empty, empty, empty, empty, empty,
 						wall },
@@ -43,8 +50,8 @@ public class mazeGenerator {
 	}
 
 	// /////////////////////////// MAP GENERATOR // /////////////////////////////////////
-	private int[][] generateRandomMaze(int mazeSize) {
-		int[][] maze = new int[mazeSize][mazeSize];
+	private char[][] generateRandomMaze(int mazeSize) {
+		char[][] maze = new char[mazeSize][mazeSize];
 
 		// Start with a grid full of walls.
 		for (int i = 0; i < mazeSize; i++) {
@@ -93,7 +100,7 @@ public class mazeGenerator {
 		return counter;
 	}
 
-	private int[] placeExit(int[][] maze, int mazeSize) {
+	private int[] placeExit(char[][] maze, int mazeSize) {
 		int corner = Helper.randInt(0, 3);
 		int position = Helper.randInt(1, mazeSize - 2);
 		int[] wallToRemove = new int[2];
@@ -140,7 +147,7 @@ public class mazeGenerator {
 		return wallToRemove;
 	}
 
-	private int[][] generatePath(int[][] maze, int mazeSize, int line, int col,
+	private char[][] generatePath(char[][] maze, int mazeSize, int line, int col,
 			int open_space) {
 		maze[line][col] = empty;
 		open_space++;
@@ -169,7 +176,7 @@ public class mazeGenerator {
 		return maze;
 	}
 
-	private boolean canGenratePath(int[][] maze, int mazeSize, int lin, int col) {
+	private boolean canGenratePath(char[][] maze, int mazeSize, int lin, int col) {
 		if (lin == 0 || col == 0 || lin == mazeSize - 1 || col == mazeSize - 1
 				|| maze[lin][col] == ' ') // LIMITS AND OCUPIED
 			return false;
@@ -201,7 +208,7 @@ public class mazeGenerator {
 		return true;
 	}
 
-	private boolean canMakePath(int[][] maze, int mazeSize) {
+	private boolean canMakePath(char[][] maze, int mazeSize) {
 		for (int i = 0; i < mazeSize - 2; i++) { // Example-> [7*7] tests untils
 													// [3x3]
 			for (int j = 0; j < mazeSize - 2; j++) { // Example-> [7*7] tests

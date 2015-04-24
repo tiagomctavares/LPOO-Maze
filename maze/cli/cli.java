@@ -1,53 +1,54 @@
 package cli;
+import java.util.Scanner;
+
 import global.Helper;
+import logic.Dragon;
+import logic.Hero;
 import logic.Logic;
+import logic.Maze;
+import logic.Sword;
 
 public class cli {
-	public cli() {
-
+	
+	private static Logic game;
+	
+	public static void main(String[] args) {
+		boolean defaultMaze = true;
+		
+		game = new Logic(defaultMaze);
+		
+		Scanner keyboard = new Scanner(System.in);
+		
+		while (!game.gameEnded()) {
+			display(game.maze.map);
+			char movement = keyboard.next().charAt(0);
+			game.play(movement);
+		}
+		
+		if(game.hasWin())
+			System.out.println("You won!");
+		else
+			System.out.println("Dragon says: great meal!");
+		
+		
+		keyboard.close();
 	}
 	
-	private static int empty = 0;
-	private static int wall = Helper.BIT(0);
-	private static int hero = Helper.BIT(1);
-	private static int exit = Helper.BIT(2);
-	private static int sword = Helper.BIT(3);
-	private static int armed = Helper.BIT(4);
-	private static int dragon = Helper.BIT(5);
-	
-	public static void display(int[][] maze) {
+	public static void display(char[][] maze) {
 		for (int i = 0; i < maze.length; i++) {
 			for (int j = 0; j < maze[i].length; j++) {
-				if ((maze[i][j] & wall) == Helper.BIT(0))
-					System.out.print("X");
-				else if ((maze[i][j] & (dragon | sword)) == (Helper.BIT(3) | Helper.BIT(5)))
-						System.out.print("F");
-				else if ((maze[i][j] & dragon) == Helper.BIT(5))
-					System.out.print("D");
-				/*else if ((maze[i][j] & hero) == Helper.BIT(1))
-					System.out.print("H");*/
-				else if(Logic.hero.getX() == i && Logic.hero.getY() == j)
-					if(Logic.hero.isArmed())
-						System.out.print("A");
-					else
-						System.out.print("H");
-				else if (Logic.sword.isActive() && Logic.sword.getX() == i && Logic.sword.getY() == j)
-					System.out.print("E");
-				//else if ((maze[i][j] & armed) == Helper.BIT(4))
-					//System.out.print("A");
-				else if ((maze[i][j] & exit) == Helper.BIT(2))
-					System.out.print("S");
-				else System.out.print(" ");
-
-				//Evens the display so it looks like a square maze
+				if(game.dragon.samePosition(i, j))
+					System.out.print(game.dragon.getSymbol());
+				else if(game.hero.samePosition(i, j))
+					System.out.print(game.hero.getSymbol());
+				else if(game.sword.samePosition(i, j))
+					System.out.print(game.sword.getSymbol());
+				else
+					System.out.print(maze[i][j]);
+				
 				System.out.print(" ");
 			}
 			System.out.println();
 		}
-		/*System.out.println("SWORD ACTIVE? "+Logic.sword.isActive());
-		System.out.println("HERO ARMED? "+Logic.hero.isArmed());
-		System.out.println("HERO: "+Logic.hero.getX()+"-"+Logic.hero.getY()+"  Sword: "+Logic.sword.getX()+"-"+Logic.sword.getY());
-		System.out.println("HERO: "+Logic.hero.getX()+"-"+Logic.hero.getY()+"  Sword: "+Logic.sword.getX()+"-"+Logic.sword.getY());
-		System.out.println(Logic.hero.equals(Logic.sword));*/
 	}
 }
