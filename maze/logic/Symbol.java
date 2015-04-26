@@ -1,5 +1,7 @@
 package logic;
 
+import java.util.Arrays;
+
 public abstract class Symbol {
 	private char symbol;
 	private int[] position = {0, 0};
@@ -12,7 +14,7 @@ public abstract class Symbol {
 	}
 
 	public int[] getPosition() {
-		return position;
+		return Arrays.copyOf(position, position.length);
 	}
 
 	public int getX() {

@@ -2,6 +2,8 @@ package logic;
 
 public class Hero extends Symbol {
 	private boolean armed = false;
+	private int dart = 0;
+	private boolean shield;
 
 	public Hero(int x, int y) {
 		super('H', x, y);
@@ -27,6 +29,31 @@ public class Hero extends Symbol {
 	
 	public char getSymbol() {
 		return super.getSymbol();
+	}
+
+	public void setDart() {
+		this.dart++;
+	}
+
+	public void useDart() {
+		if(dart>0)
+			this.dart--;
+	}
+	
+	public boolean hasDart() {
+		return dart!=0;
+	}
+
+	public int getDarts() {
+		return dart;
+	}
+
+	public void grabShield() {
+		this.shield = true;		
+	}
+
+	public boolean hasShield() {
+		return shield;
 	}
 	
 	

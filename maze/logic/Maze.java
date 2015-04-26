@@ -6,23 +6,27 @@ import global.Helper;
 
 public class Maze {
 
-	private char empty = ' ';
+	public char empty;
 	public char wall;
 	public char exit;
 	public char[][] map;
+	public int openSpaces;
+	private int mapSize;
 	
 	public Maze() {
 		this.wall = 'X';
-		System.out.println("INIT");
-		this.exit = 'E';
+		this.exit = 'S';
+		this.empty = ' ';
+		this.openSpaces = 0;
+		
 	}
 
-	public void generateMap(boolean random, int number) {
-	
-		if (random)
-			map = generateRandomMaze(number);
-		else
+	public void generateMap(boolean defaultMaze, int number) {
+		mapSize = number;
+		if (defaultMaze)
 			map = defaultMaze();
+		else
+			map = generateRandomMaze(number);
 
 	}
 
@@ -62,14 +66,12 @@ public class Maze {
 		int[] firstWall = placeExit(maze, mazeSize);
 
 		maze = generatePath(maze, mazeSize, firstWall[0], firstWall[1], 0);
-		/*maze = placeSymbol(maze, mazeSize, dragon);
-		maze = placeSymbol(maze, mazeSize, hero);
-		maze = placeSymbol(maze, mazeSize, sword);*/
+		
 
 		return maze;
 	}
-
-	private int[][] placeSymbol(int[][] maze, int mazeSize, int symbol) {
+	/*
+	public int[][] placeSymbol(int[][] maze, int mazeSize, int symbol) {
 		int numberEmpty = getTotalEmpty(maze, mazeSize);
 		int placePosition = Helper.randInt(0, numberEmpty);
 		return placeSymbolMaze(maze, mazeSize, placePosition, symbol);
@@ -89,16 +91,40 @@ public class Maze {
 		
 		return maze;
 	}
+	*/
 
-	private int getTotalEmpty(int[][] maze, int mazeSize) {
+	public int getTotalEmpty() {
 		int counter = 0;
 		
-		for(int i=0; i<mazeSize; i++)
-			for(int j=0; j<mazeSize; j++)
-				if(maze[i][j] == empty)
+		for(int i=0; i<mapSize; i++)
+			for(int j=0; j<mapSize; j++)
+				if(map[i][j] == empty)
 					counter++;
+		
 		return counter;
 	}
+
+
+	public int[] placeCharacter(int placeNumber) {
+		int counter = 0;
+		int[] position = {0, 0};
+		
+		for(int i=0; i<mapSize; i++)
+			for(int j=0; j<mapSize; j++) {
+				if(map[i][j] == empty)
+					counter++;
+				
+				if(placeNumber == counter) {
+					position[0] = i;
+					position[1] = j;
+					map[i][j] = 'O';
+					return position;
+				}
+			}
+		
+		return position;
+	}
+
 
 	private int[] placeExit(char[][] maze, int mazeSize) {
 		int corner = Helper.randInt(0, 3);
@@ -147,14 +173,13 @@ public class Maze {
 		return wallToRemove;
 	}
 
-	private char[][] generatePath(char[][] maze, int mazeSize, int line, int col,
-			int open_space) {
+	private char[][] generatePath(char[][] maze, int mazeSize, int line, int col, int open_space) {
 		maze[line][col] = empty;
 		open_space++;
 
 		int[] vec = { 0, 1, 2, 3 };
 		vec = Helper.sort_arr(vec);
-
+		
 		if (!canMakePath(maze, mazeSize)) {
 			return maze;
 		}
@@ -226,4 +251,12 @@ public class Maze {
 		return false; // cant!
 	}
 
+	public void removeOcupied() {
+		
+		for(int i=0; i<mapSize; i++)
+			for(int j=0; j<mapSize; j++)
+				if(map[i][j] == 'O')
+					map[i][j] = empty;
+		
+	}
 }

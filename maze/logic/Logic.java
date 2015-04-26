@@ -1,6 +1,8 @@
 package logic;
+import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
+
 import cli.cli;
 
 //BIT 0 -> Wall
@@ -11,97 +13,161 @@ import cli.cli;
 //BIT 5 -> Dragon
 
 public class Logic {
+	// Elements
 	public Maze maze;
-	public Dragon dragon;
+	public ArrayList<Dragon> dragons;
 	public Hero hero;
 	public Sword sword;
-	// 1-> Win 2-> Loose  
-	private int gameOver;
+	public ArrayList<Dart> darts;
+	public Shield shield;
 	
-	public Logic(boolean defaultMaze) {
+	// symbols
+	private char dragonCharacterSymbol;
+	private char dragonSleepCharacterSymbol;
+	private char dragonSleepSymbol;
+	private char dragonSymbol;
+	
+	// States
+	// 1-> Win 2-> lose eaten 3-> lose Burned
+	private int gameOver;
+	// 1-> Stopped, 2->Random, 3->Random+Sleep
+	private int dragonOptions;
+	private int dragonNumber;
+	private int dartNumber;
+	
+	public Logic(boolean defaultMaze, int mapSize, int dragonOptions, int dragonNumber) {
 		maze = new Maze();
 		gameOver = 0;
+		this.dragonOptions = dragonOptions;
+		this.dartNumber = this.dragonNumber = dragonNumber;
+		dragons = new ArrayList<Dragon>();
+		darts = new ArrayList<Dart>();
 		
+		dragonCharacterSymbol = 'F';
+		dragonSleepSymbol = 'd';
+		dragonSymbol = 'D';
+		dragonSleepCharacterSymbol = 'f';
+		
+		
+		if( defaultMaze) {
+			maze.generateMap(defaultMaze, 10);
+		} else {
+			maze.generateMap(defaultMaze, mapSize);
+		}
+		
+		placeCharacters(defaultMaze);
+		refreshSymbols();
+	}
+	
+	private void refreshSymbols() {
+
+		for (Dragon dragon : dragons) {
+
+			// Check Dragon and Darts (Update Dragon symbol)
+			for (Dart dart : darts) {
+
+				if(sword.isActive() && !dragon.isDead()) {
+					if(dragon.samePosition(dart.getPosition()))
+						if(dragon.isSleeping())
+							dragon.setSymbol(dragonSleepCharacterSymbol);
+						else
+							dragon.setSymbol(dragonCharacterSymbol);
+				}
+			}
+			
+			// Check Dragon and Shield (Update Dragon symbol)
+			if(shield.isActive() && !dragon.isDead()) {
+				if(dragon.samePosition(shield.getPosition()))
+					if(dragon.isSleeping())
+						dragon.setSymbol(dragonSleepCharacterSymbol);
+					else
+						dragon.setSymbol(dragonCharacterSymbol);
+			}
+			
+			// Check Dragon and Sword (Update Dragon symbol)
+			if(sword.isActive() && !dragon.isDead()) {
+				if(dragon.samePosition(sword.getPosition()))
+					if(dragon.isSleeping())
+						dragon.setSymbol(dragonSleepCharacterSymbol);
+					else
+						dragon.setSymbol(dragonCharacterSymbol);
+			}
+		}
+		
+	}
+
+	private void placeCharacters(boolean defaultMaze) {
 		if(defaultMaze) {
-			maze.generateMap(!defaultMaze, 10);
 			hero = new Hero(1, 1);
 			sword = new Sword(8, 1);
-			dragon = new Dragon(3, 1);
-		} else {
-			maze.generateMap(defaultMaze, 10); 
+			shield = new Shield(5, 3);
+			dragons.add(new Dragon(3, 1));
+			darts.add(new Dart(1, 2));
+		}else {
+			int openSpaces = maze.getTotalEmpty();
+			int[] position;
+			//Place Dragon
+			
+			for(int j = 0; j<dragonNumber; j++) {
+				position = maze.placeCharacter(Helper.randInt(0, openSpaces-1));
+				dragons.add(new Dragon(position[0], position[1]));
+				openSpaces--;
+			}
+			
+			//Place Sword
+			position = maze.placeCharacter(Helper.randInt(0, openSpaces-1));
+			sword = new Sword(position[0], position[1]);
+			openSpaces--;
+			
+			//Place Shield
+			position = maze.placeCharacter(Helper.randInt(0, openSpaces-1));
+			shield = new Shield(position[0], position[1]);
+			openSpaces--;
+			
+			// Place darts
+			for(int j = 0; j<dartNumber; j++) {
+				position = maze.placeCharacter(Helper.randInt(0, openSpaces-1));
+				darts.add(new Dart(position[0], position[1]));
+				openSpaces--;
+			}
+			
+			// Place Hero (Attention Dragons)
+			while(true) {
+				position = maze.placeCharacter(Helper.randInt(0, openSpaces-1));
+				
+				int dragonsOk = 0;
+				for (Dragon dragon : dragons) {
+					if( !dragonEncounter(dragon, position[0], position[1]))
+						dragonsOk++;
+				}
+				
+				if( dragonsOk == dragonNumber) {
+					hero = new Hero(position[0], position[1]);
+					break;
+				} else {
+					maze.map[position[0]][position[1]] = maze.empty;
+				}
+			}
+			
+			maze.removeOcupied();
 		}
+		
 	}
-	
+
 	public void play(char movement) {
 		moveHero(movement);
-		
-		if (!dragon.isDead()) {
-			moveDragon();
-		}
-		
-		checkDragon();
-	}
+		useDart(movement);
 
-	
-
-	private void checkDragon() {
-		int[] hero_loc = hero.getPosition();
-		
-		String col_detect;
-		int dy, dx;
-		for (int i = 0; i < 5; i++) {
-			dy = dx = 0;
-			switch (i) {
-			case 0: //left
-				dx--;
-				break;
-			case 1: //right
-				dx++;
-				break;
-			case 2: //up
-				dy--;
-				break;
-			case 3: //down
-				dy++;
-				break;
-			}
-			hero_loc[0] += dy;
-			hero_loc[1] += dx;
-			col_detect = collision(hero_loc);
-			if (col_detect == "dragon") {
-				if (hero.isArmed()) {
-					dragon.die();
-				} else loseGame();
-			}
-			hero_loc[0] -= dy;
-			hero_loc[1] -= dx;
+		for (Dragon dragon : dragons) {
 			
-			hero.move(hero_loc);
+			if (!dragon.isDead() && dragonOptions != 1) {
+				dragon.awake();
+				moveDragon(dragon);
+			}
+			
 		}
-	}
-
-	private String dragonCollision(int[] dragon_loc) {
-		if (maze.map[dragon_loc[0]][dragon_loc[1]] == maze.wall)
-			return "wall";
-		else if (dragon_loc[0] == sword.getX() && dragon_loc[1] == sword.getY())
-			return "sword";
-		else if (maze.map[dragon_loc[0]][dragon_loc[1]] == maze.exit)
-			return "exit";
 		
-		else return "empty";
-	}
-
-	private String collision(int[] hero_loc) {
-		
-		if (maze.map[hero_loc[0]][hero_loc[1]] == maze.wall)
-			return "wall";
-		else if (hero_loc[0] == dragon.getX() && hero_loc[1] == dragon.getY())
-			return "dragon";
-		else if (hero.samePosition(sword.getPosition()))
-			return "sword";
-		else if (maze.map[hero_loc[0]][hero_loc[1]] == maze.exit)
-			return "exit";
-		else return "empty";
+		refreshCharacters();
 	}
 	
 	public boolean gameEnded() {
@@ -110,16 +176,125 @@ public class Logic {
 		return true;
 	}
 	
-	public boolean hasWin() {
-		if(gameOver == 2)
-			return false;
-		else
-			return true;
+	public int gameOverCode() {
+		return gameOver;
 	}
 
-	private void loseGame() {
+	private void refreshCharacters() {
+		int[] heroLocation = hero.getPosition();
+		
+		for (Dragon dragon : dragons) {
+			if( !dragon.isDead()) {
+				// Set dragon Symbol to default
+				dragon.setSymbol(dragonSymbol);
+				
+				// Check if dragon is Sleeping
+				if(dragon.isSleeping()) {
+					dragon.setSymbol(dragonSleepSymbol);
+				}
+				
+				// Check for Dragons Collision
+				boolean dragonEncounter = dragonEncounter(dragon, heroLocation[0], heroLocation[1]);
+				
+				if(dragonEncounter) {
+					if(hero.isArmed())
+						dragon.die();
+					else if(!dragon.isSleeping())
+						this.loseGame(2);
+				}
+				
+				// Dragons Breath
+				if( !hero.hasShield()) {
+					boolean dragonFireHitHero = false;
+					if( !dragon.isDead() && !dragon.isSleeping())
+						dragonFireHitHero = dragonFireHitHero(dragon);
+				
+					if(dragonFireHitHero)
+						loseGame(3);
+				}
+			}
+		}
+		
+		refreshSymbols();
+	}
+
+	private boolean dragonEncounter(Dragon dragon, int heroX, int heroY) {
+		boolean dragonEncounter = false;
+		
+		if(dragon.samePosition(heroX, heroY))
+			dragonEncounter = true;
+		else if(dragon.samePosition(heroX+1, heroY))
+			dragonEncounter = true;
+		else if(dragon.samePosition(heroX-1, heroY))
+			dragonEncounter = true;
+		else if(dragon.samePosition(heroX, heroY+1))
+			dragonEncounter = true;
+		else if(dragon.samePosition(heroX, heroY-1))
+			dragonEncounter = true;
+		
+		return dragonEncounter;
+	}
+
+	private boolean dragonFireHitHero(Dragon dragon) {
+		int x = dragon.getX();
+		int y = dragon.getY();
+		
+		if(hero.samePosition(x, y))
+			return true;
+
+
+		if(dragonFireHitHeroIteration(dragon, x, y+1, 0, 1, 1))
+			return true;
+		if(dragonFireHitHeroIteration(dragon, x, y-1, 0, -1, 1))
+			return true;
+		if(dragonFireHitHeroIteration(dragon, x+1, y, 1, 0, 1))
+			return true;
+		if(dragonFireHitHeroIteration(dragon, x-1, y, -1, 0, 1))
+			return true;
+		
+		return false;
+	}
+
+	private boolean dragonFireHitHeroIteration(Dragon dragon, int x, int y, int incrementX, int incrementY, int iteration) {
+		if(iteration > 3)
+			return false;
+		
+		if(maze.map[x][y] == maze.wall)
+			return false;
+		
+		if(hero.samePosition(x, y))
+			return true;
+		
+		return dragonFireHitHeroIteration(dragon, x+incrementX, y+incrementY, incrementX, incrementY, iteration++);
+	}
+
+	private boolean canMoveHeroPosition(int x, int y) {
+		
+		if (maze.map[x][y] == maze.wall)
+			return false;
+		else if (sword.samePosition(x, y)) {
+			hero.setArmed();
+			sword.setActive(false);
+		}else if (shield.samePosition(x, y)) {
+			hero.grabShield();
+			shield.setActive(false);
+		}else if (maze.map[x][y] == maze.exit && hero.isArmed()) {
+			winGame();
+		}
+
+		for (Dart dart : darts) {
+			if(dart.samePosition(x, y) && dart.isActive()) {
+				dart.GrabDart();
+				hero.setDart();
+			}
+		}
+		
+		return true;
+	}
+
+	private void loseGame(int code) {
 		cli.display(maze.map);
-		gameOver = 2;
+		gameOver = code;
 	}
 
 	private void winGame() {
@@ -127,85 +302,111 @@ public class Logic {
 		gameOver = 1;
 	}
 
-	private void moveDragon() {
-		int[] dragon_loc = dragon.getPosition();
-		int movement = Helper.randInt(0, 4);
-		String col_detect;
-		int dy, dx;
-		dy = dx = 0;
-		switch (movement) {
-		case 0: //left
-			dx--;
-			break;
-		case 1: //right
-			dx++;
-			break;
-		case 2: //up
-			dy--;
-			break;
-		case 3: //down
-			dy++;
-			break;
-		case 4: //hold
-			break;
-		}
-		dragon_loc[0] += dy;
-		dragon_loc[1] += dx;
+	private void moveDragon(Dragon dragon) {
+		int[] dragonLocation = dragon.getPosition();
+		ArrayList<Integer> movement = allowedMoveDragon(dragon);
+		int randomMove = Helper.randInt(0, movement.size()-1);
 		
-		col_detect = dragonCollision(dragon_loc);
-		
-		if (col_detect == "sword" || col_detect == "empty") {
-			dragon.move(dragon_loc[0], dragon_loc[1]);
-		} else {
-			dragon_loc[0] -= dy;
-			dragon_loc[1] -= dx;
+		if(movement.get(randomMove) == 0)
+			dragonLocation[0]--;
+		else if((movement.get(randomMove) == 1))
+			dragonLocation[0]++;
+		else if((movement.get(randomMove) == 2))
+			dragonLocation[1]--;
+		else if((movement.get(randomMove) == 3))
+			dragonLocation[1]++;
+		else if((movement.get(randomMove) == 4)) {
+			dragon.sleep();
+			return;
 		}
+		
+		dragon.move(dragonLocation[0], dragonLocation[1]);
+	}
+
+	private ArrayList<Integer> allowedMoveDragon(Dragon dragon) {
+		ArrayList<Integer> moves = new ArrayList<>();
+
+		// Up
+		if(dragonCanMove(dragon, dragon.getX()-1, dragon.getY())) moves.add(0);
+		
+		// Down
+		if(dragonCanMove(dragon, dragon.getX()+1, dragon.getY())) moves.add(1);
+
+		// Left
+		if(dragonCanMove(dragon, dragon.getX(), dragon.getY()-1)) moves.add(2);
+
+		// Right
+		if(dragonCanMove(dragon, dragon.getX(), dragon.getY()+1)) moves.add(3);
+		
+		// Sleep
+		if(dragonOptions == 3)
+			moves.add(4);
+		
+		return moves;
+	}
+
+	private boolean dragonCanMove(Dragon dragon, int i, int y) {
+		
+		if(maze.map[i][y] == maze.wall || maze.map[i][y] == maze.exit || dragon.samePosition(hero.getPosition()))
+			return false;
+		
+		return true;
 	}
 
 	private void moveHero(char movement) {
-		int hero_loc[] = hero.getPosition();
+		int heroLocation[] = hero.getPosition();
 		
-		String col_detect;
-		int dy, dx;
-		dy = dx = 0;
-		switch (movement) {
-		case 'a': //left
-			dx--;
-			break;
-		case 'd': //right
-			dx++;
-			break;
-		case 'w': //up
-			dy--;
-			break;
-		case 's': //down
-			dy++;
-			break;
-		}
-		hero_loc[0] += dy;
-		hero_loc[1] += dx;
-		col_detect = collision(hero_loc);
-		if (col_detect == "wall") {
-			hero_loc[0] -= dy;
-			hero_loc[1] -= dx;
-		}
-		else if (col_detect == "sword") {
-			hero.setArmed();
-			sword.setActive(false);
-		}
-		/*else if (col_detect == "empty") {
-			init_map[hero_loc[0]][hero_loc[1]] = init_map[hero_loc[0] - dy][hero_loc[1] - dx]; //Copy previous state
-			init_map[hero_loc[0] - dy][hero_loc[1] - dx] = empty;
-		}*/
-		else if (col_detect == "exit") {
-			if (hero.isArmed())
-				winGame();
-			else {
-				hero_loc[0] -= dy;
-				hero_loc[1] -= dx;
+		if(movement == 'a')
+			heroLocation[1]--;
+		else if(movement == 'd')
+			heroLocation[1]++;
+		else if(movement == 'w')
+			heroLocation[0]--;
+		else if(movement == 's')
+			heroLocation[0]++;		
+	
+		if(canMoveHeroPosition(heroLocation[0], heroLocation[1]))
+			hero.move(heroLocation);
+	}
+	
+	private void useDart(char movement) {
+		if(hero.hasDart()) {
+			int heroLocation[] = hero.getPosition();
+			int directionX = 0;
+			int directionY = 0;
+	
+			// left
+			if(movement == 'f')
+				directionY = -1;
+			// right
+			else if(movement == 'h')
+				directionY = 1;
+			// up
+			else if(movement == 't')
+				directionX = -1;
+			// down
+			else if(movement == 'g')
+				directionX = 1;
+			
+			if(directionX != 0 || directionY != 0) {
+				hero.useDart();
+				dartIteration(directionX, directionY, heroLocation[0]+directionX, heroLocation[1]+directionY);
 			}
 		}
+	}
+
+	private void dartIteration(int directionX, int directionY, int i, int j) {
+		if(maze.map[i][j] == maze.wall)
+			return ;
 		
-		hero.move(hero_loc);
+		for (Dragon dragon : dragons) {
+			if( !dragon.isDead() && dragon.samePosition(i, j)) {
+				dragon.die();
+				return ;
+			}
+		}
+
+		dartIteration(directionX, directionY, i+directionX, j+directionY);
 	}
 }
+
