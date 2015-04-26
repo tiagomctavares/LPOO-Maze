@@ -1,9 +1,5 @@
 package logic;
 import java.util.ArrayList;
-import java.util.Random;
-import java.util.Scanner;
-
-import cli.cli;
 
 //BIT 0 -> Wall
 //BIT 1 -> Hero
@@ -14,12 +10,12 @@ import cli.cli;
 
 public class Logic {
 	// Elements
-	public Maze maze;
-	public ArrayList<Dragon> dragons;
-	public Hero hero;
-	public Sword sword;
-	public ArrayList<Dart> darts;
-	public Shield shield;
+	private Maze maze;
+	private ArrayList<Dragon> dragons;
+	private Hero hero;
+	private Sword sword;
+	private ArrayList<Dart> darts;
+	private Shield shield;
 	
 	// symbols
 	private char dragonCharacterSymbol;
@@ -34,29 +30,84 @@ public class Logic {
 	private int dragonOptions;
 	private int dragonNumber;
 	private int dartNumber;
+	private GameMessages messages;
 	
-	public Logic(boolean defaultMaze, int mapSize, int dragonOptions, int dragonNumber) {
+	private void init() {
 		maze = new Maze();
 		gameOver = 0;
-		this.dragonOptions = dragonOptions;
-		this.dartNumber = this.dragonNumber = dragonNumber;
 		dragons = new ArrayList<Dragon>();
 		darts = new ArrayList<Dart>();
+		messages = new GameMessages();
 		
 		dragonCharacterSymbol = 'F';
 		dragonSleepSymbol = 'd';
 		dragonSymbol = 'D';
 		dragonSleepCharacterSymbol = 'f';
+	}
+	
+	public Logic(int dragonOptions) {
+		init();
+		this.dragonOptions = dragonOptions;
+		this.dartNumber = dragonNumber = 1;
+		maze.generateMap(true, 10);
+
+		hero = new Hero(1, 1);
+		sword = new Sword(8, 1);
+		shield = new Shield(5, 3);
+		dragons.add(new Dragon(3, 1));
+		darts.add(new Dart(1, 2));
+	}
+	
+	public Logic(int mapSize, int dragonOptions, int dragonNumber) {
+		init();
+		this.dragonOptions = dragonOptions;
+		this.dartNumber = this.dragonNumber = dragonNumber;
 		
+		maze.generateMap(false, mapSize);
 		
-		if( defaultMaze) {
-			maze.generateMap(defaultMaze, 10);
-		} else {
-			maze.generateMap(defaultMaze, mapSize);
+		placeCharacters();
+		refreshSymbols();
+	}
+
+	public char[][] getMap() {
+		char[][] map = Helper.deepCopy(maze.map);
+		
+		for (int i = 0; i < maze.mapSize; i++) {
+			for (int j = 0; j < maze.mapSize; j++) {
+				boolean characterFound = false;
+				
+				for (Dragon dragon : dragons) {
+					if(dragon.samePosition(i, j)) {
+						map[i][j] = dragon.getSymbol();
+						characterFound = true;
+						break;
+					}
+				}
+				
+				if(!characterFound) {
+					for (Dart dart : darts) {
+						if(dart.samePosition(i, j)) {
+							map[i][j] = dart.getSymbol();
+							characterFound = true;
+							break;
+						}
+					}
+				}
+				
+				if(!characterFound) {
+					
+					if(hero.samePosition(i, j) && (gameOverCode() == 0 || gameOverCode() == 1))
+						map[i][j] = hero.getSymbol();
+					else if(shield.samePosition(i, j) && shield.isActive())
+						map[i][j] = shield.getSymbol();
+					else if(sword.samePosition(i, j) && sword.isActive())
+						map[i][j] = sword.getSymbol();
+				}
+			}
 		}
 		
-		placeCharacters(defaultMaze);
-		refreshSymbols();
+		
+		return map;
 	}
 	
 	private void refreshSymbols() {
@@ -96,61 +147,53 @@ public class Logic {
 		
 	}
 
-	private void placeCharacters(boolean defaultMaze) {
-		if(defaultMaze) {
-			hero = new Hero(1, 1);
-			sword = new Sword(8, 1);
-			shield = new Shield(5, 3);
-			dragons.add(new Dragon(3, 1));
-			darts.add(new Dart(1, 2));
-		}else {
-			int openSpaces = maze.getTotalEmpty();
-			int[] position;
-			//Place Dragon
-			
-			for(int j = 0; j<dragonNumber; j++) {
-				position = maze.placeCharacter(Helper.randInt(0, openSpaces-1));
-				dragons.add(new Dragon(position[0], position[1]));
-				openSpaces--;
-			}
-			
-			//Place Sword
+	private void placeCharacters() {
+		int openSpaces = maze.getTotalEmpty();
+		int[] position;
+		//Place Dragon
+		
+		for(int j = 0; j<dragonNumber; j++) {
 			position = maze.placeCharacter(Helper.randInt(0, openSpaces-1));
-			sword = new Sword(position[0], position[1]);
+			dragons.add(new Dragon(position[0], position[1]));
 			openSpaces--;
-			
-			//Place Shield
-			position = maze.placeCharacter(Helper.randInt(0, openSpaces-1));
-			shield = new Shield(position[0], position[1]);
-			openSpaces--;
-			
-			// Place darts
-			for(int j = 0; j<dartNumber; j++) {
-				position = maze.placeCharacter(Helper.randInt(0, openSpaces-1));
-				darts.add(new Dart(position[0], position[1]));
-				openSpaces--;
-			}
-			
-			// Place Hero (Attention Dragons)
-			while(true) {
-				position = maze.placeCharacter(Helper.randInt(0, openSpaces-1));
-				
-				int dragonsOk = 0;
-				for (Dragon dragon : dragons) {
-					if( !dragonEncounter(dragon, position[0], position[1]))
-						dragonsOk++;
-				}
-				
-				if( dragonsOk == dragonNumber) {
-					hero = new Hero(position[0], position[1]);
-					break;
-				} else {
-					maze.map[position[0]][position[1]] = maze.empty;
-				}
-			}
-			
-			maze.removeOcupied();
 		}
+		
+		//Place Sword
+		position = maze.placeCharacter(Helper.randInt(0, openSpaces-1));
+		sword = new Sword(position[0], position[1]);
+		openSpaces--;
+		
+		//Place Shield
+		position = maze.placeCharacter(Helper.randInt(0, openSpaces-1));
+		shield = new Shield(position[0], position[1]);
+		openSpaces--;
+		
+		// Place darts
+		for(int j = 0; j<dartNumber; j++) {
+			position = maze.placeCharacter(Helper.randInt(0, openSpaces-1));
+			darts.add(new Dart(position[0], position[1]));
+			openSpaces--;
+		}
+		
+		// Place Hero (Attention Dragons)
+		while(true) {
+			position = maze.placeCharacter(Helper.randInt(0, openSpaces-1));
+			
+			int dragonsOk = 0;
+			for (Dragon dragon : dragons) {
+				if( !dragonEncounter(dragon, position[0], position[1]))
+					dragonsOk++;
+			}
+			
+			if( dragonsOk == dragonNumber) {
+				hero = new Hero(position[0], position[1]);
+				break;
+			} else {
+				maze.map[position[0]][position[1]] = maze.empty;
+			}
+		}
+		
+		maze.removeOcupied();
 		
 	}
 
@@ -203,14 +246,17 @@ public class Logic {
 						this.loseGame(2);
 				}
 				
-				// Dragons Breath
-				if( !hero.hasShield()) {
-					boolean dragonFireHitHero = false;
-					if( !dragon.isDead() && !dragon.isSleeping())
-						dragonFireHitHero = dragonFireHitHero(dragon);
-				
-					if(dragonFireHitHero)
-						loseGame(3);
+				if( !gameEnded())
+				{
+					// Dragons Breath
+					if( !hero.hasShield()) {
+						boolean dragonFireHitHero = false;
+						if( !dragon.isDead() && !dragon.isSleeping())
+							dragonFireHitHero = dragonFireHitHero(dragon);
+					
+						if(dragonFireHitHero)
+							loseGame(3);
+					}
 				}
 			}
 		}
@@ -293,12 +339,11 @@ public class Logic {
 	}
 
 	private void loseGame(int code) {
-		cli.display(maze.map);
+		hero.setActive(false);
 		gameOver = code;
 	}
 
 	private void winGame() {
-		cli.display(maze.map);
 		gameOver = 1;
 	}
 
@@ -407,6 +452,76 @@ public class Logic {
 		}
 
 		dartIteration(directionX, directionY, i+directionX, j+directionY);
+	}
+
+	public int heroDarts() {
+		return hero.getDarts();
+	}
+
+	public String getGameEndedMessage() {
+		// Win
+		if(gameOverCode() == 1)
+			return messages.getEndMessage(0);
+		// Lost
+		if(gameOverCode() == 2)
+			return messages.getEndMessage(1);
+		// Lost burned
+		if(gameOverCode() == 3)
+			return messages.getEndMessage(2);
+		
+		return "";
+	}
+
+	public String getGameMessage() {
+
+		
+		if(!hero.hasShield())
+			return messages.getPlayMessage(0);
+		else if(hero.hasShield() && hero.isArmed())
+			return messages.getPlayMessage(1);
+		else
+			return messages.getPlayMessage(2);
+		
+	}
+
+	public Maze getMaze() {
+		return maze;
+	}
+
+	public ArrayList<Dragon> getDragons() {
+		return dragons;
+	}
+
+	public Hero getHero() {
+		return hero;
+	}
+
+	public Sword getSword() {
+		return sword;
+	}
+
+	public ArrayList<Dart> getDarts() {
+		return darts;
+	}
+
+	public Shield getShield() {
+		return shield;
+	}
+
+	public char getDragonCharacterSymbol() {
+		return dragonCharacterSymbol;
+	}
+
+	public char getDragonSleepCharacterSymbol() {
+		return dragonSleepCharacterSymbol;
+	}
+
+	public char getDragonSleepSymbol() {
+		return dragonSleepSymbol;
+	}
+
+	public char getDragonSymbol() {
+		return dragonSymbol;
 	}
 }
 

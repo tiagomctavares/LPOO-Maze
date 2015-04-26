@@ -1,7 +1,6 @@
 package logic;
 
 import java.util.Arrays;
-import java.util.Random;
 import global.Helper;
 
 public class Maze {
@@ -11,7 +10,7 @@ public class Maze {
 	public char exit;
 	public char[][] map;
 	public int openSpaces;
-	private int mapSize;
+	public int mapSize;
 	
 	public Maze() {
 		this.wall = 'X';

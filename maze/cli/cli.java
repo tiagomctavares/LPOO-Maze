@@ -1,18 +1,12 @@
 package cli;
 import java.util.Scanner;
 
-import global.Helper;
-import logic.Dart;
-import logic.Dragon;
-import logic.Hero;
 import logic.Logic;
-import logic.Maze;
-import logic.Sword;
 
 public class cli {
 	
 	private static Logic game;
-	private static boolean debug = true; 
+	private static boolean debug = false; 
 	private static boolean debugRandom = false; 
 	
 	public static void main(String[] args) {
@@ -22,20 +16,14 @@ public class cli {
 		displayOptions(keyboard);
 		
 		while (!game.gameEnded()) {
-			display(game.maze.map);
+			display(game.getMap());
 			char movement = keyboard.next().charAt(0);
 			game.play(movement);
 		}
 
-		display(game.maze.map);
+		display(game.getMap());
 		
-		if(game.gameOverCode() == 1)
-			System.out.println("How is this possible?! You cheated! No one can beat my Dragons!");
-		else if(game.gameOverCode() == 2)
-			System.out.println("What a great meal for my pet Dragons!");
-		else if(game.gameOverCode() == 3)
-			System.out.println("Extra crispy Hero! Royal feast for my Dragons!");
-		
+		System.out.println(game.getGameEndedMessage());
 		
 		keyboard.close();
 	}
@@ -43,9 +31,9 @@ public class cli {
 	private static void displayOptions(Scanner keyboard) {
 		if(debug) {
 			if( !debugRandom)
-				game = new Logic(true, 10, 1, 3);
+				game = new Logic(1);
 			else
-				game = new Logic(false, 10, 2, 2);
+				game = new Logic(10, 2, 2);
 				
 			return;
 		}
@@ -62,7 +50,7 @@ public class cli {
 				
 				if(option == '1') {
 					int dragonOptions = dragonMovementOptions(keyboard);
-					game = new Logic(true, 10, dragonOptions, 1);
+					game = new Logic(dragonOptions);
 					break;
 				}else if(option == '2') {
 					while(true) {
@@ -73,7 +61,7 @@ public class cli {
 						if(mazeSize >= 10) {
 							int dragonOptions = dragonMovementOptions(keyboard);
 							int dragonNumber = dragonNumber(keyboard);
-							game = new Logic(false, mazeSize, dragonOptions, dragonNumber);
+							game = new Logic(mazeSize, dragonOptions, dragonNumber);
 							break;
 						}
 					}
@@ -109,52 +97,17 @@ public class cli {
 		}
 	}
 
-	public static void display(char[][] maze) {
-		for (int i = 0; i < maze.length; i++) {
-			for (int j = 0; j < maze[i].length; j++) {
-				boolean characterFound = false;
-				
-				for (Dragon dragon : game.dragons) {
-					if(dragon.samePosition(i, j)) {
-						System.out.print(dragon.getSymbol());
-						characterFound = true;
-						break;
-					}
-				}
-				
-				if(!characterFound) {
-					for (Dart dart : game.darts) {
-						if(dart.samePosition(i, j)) {
-							System.out.print(dart.getSymbol());
-							characterFound = true;
-							break;
-						}
-					}
-				}
-				
-				if(!characterFound) {
-					
-					if(game.hero.samePosition(i, j) && (game.gameOverCode() == 0 || game.gameOverCode() == 1))
-						System.out.print(game.hero.getSymbol());
-					else if(game.shield.samePosition(i, j) && game.shield.isActive())
-						System.out.print(game.shield.getSymbol());
-					else if(game.sword.samePosition(i, j) && game.sword.isActive())
-						System.out.print(game.sword.getSymbol());
-					else
-						System.out.print(maze[i][j]);
-				}
+	public static void display(char[][] map) {
+		
+		for (int i = 0; i < map.length; i++) {
+			for (int j = 0; j < map[i].length; j++) {
+				System.out.print(map[i][j]);
 				System.out.print(" ");
 			}
 			System.out.println();
 		}
 		
-		if(!game.hero.hasShield())
-			System.out.println("Without the shield you are nothing agains my Dragons! (P -> shield)");
-		else if(game.hero.hasShield() && game.hero.isArmed())
-			System.out.println("Please mercy on my Dragons! I promise to let you go for today!");
-		else
-			System.out.println("The Dragons can't burn you! But you will be eaten raw!");
-		
-		System.out.println(game.hero.getDarts()+" darts in your backpack (f, g, h, t to launch them)");
+		System.out.println(game.getGameMessage());
+		System.out.println(game.heroDarts()+" darts in your backpack (f, g, h, t to launch them)");
 	}
 }
