@@ -1,4 +1,3 @@
 MAZE PROJECT LPOO 2014-2015
 
-ei11056 Francisco Lopes
-        Tiago Tavares
+ei10140@fe.up.pt - Tiago Tavares
