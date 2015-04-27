@@ -24,7 +24,10 @@ public class Hero extends Symbol {
 
 	public void setArmed() {
 		this.armed = true;
-		super.setSymbol('A');
+		if(this.shield)
+			super.setSymbol('I');
+		else			
+			super.setSymbol('A');
 	}
 	
 	public char getSymbol() {
@@ -34,7 +37,7 @@ public class Hero extends Symbol {
 	public void setDart() {
 		this.dart++;
 	}
-
+	
 	public void useDart() {
 		if(dart>0)
 			this.dart--;
@@ -50,6 +53,10 @@ public class Hero extends Symbol {
 
 	public void grabShield() {
 		this.shield = true;		
+		if(this.isArmed())
+			super.setSymbol('I');
+		else
+			super.setSymbol('O');
 	}
 
 	public boolean hasShield() {

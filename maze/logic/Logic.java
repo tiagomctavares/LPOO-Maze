@@ -18,10 +18,36 @@ public class Logic {
 	private Shield shield;
 	
 	// symbols
-	private char dragonCharacterSymbol;
-	private char dragonSleepCharacterSymbol;
-	private char dragonSleepSymbol;
-	private char dragonSymbol;
+	public static char heroSymbol = 'H';
+	public static char heroSwordSymbol = 'A';
+	public static char heroShieldSymbol = 'O';
+	public static char heroSwordShieldSymbol = 'I';
+	
+	public static char dragonSymbol = 'D';
+	public static char dragonSleepSymbol = 'd';
+	public static char dragonSwordSymbol = 'F';
+	public static char dragonSleepSwordSymbol = 'f';
+	public static char dragonShieldSymbol = 'G';
+	public static char dragonSleepShieldSymbol = 'g';
+	public static char dragonDartSymbol = 'J';
+	public static char dragonSleepDartSymbol = 'j';
+	
+	public static char swordSymbol = 'E';
+	public static char shieldSymbol = 'P';
+	public static char dartSymbol = 'T';
+	
+	public static char wallSymbol = 'X';
+
+	// MOVEMENT
+	public static char MOVE_UP = 'w';
+	public static char MOVE_LEFT = 'a';
+	public static char MOVE_RIGHT = 'd';
+	public static char MOVE_DOWN = 's';
+	
+	public static char SHOOT_UP = 't';
+	public static char SHOOT_LEFT = 'f';
+	public static char SHOOT_RIGHT = 'h';
+	public static char SHOOT_DOWN = 'g';
 	
 	// States
 	// 1-> Win 2-> lose eaten 3-> lose Burned
@@ -38,11 +64,6 @@ public class Logic {
 		dragons = new ArrayList<Dragon>();
 		darts = new ArrayList<Dart>();
 		messages = new GameMessages();
-		
-		dragonCharacterSymbol = 'F';
-		dragonSleepSymbol = 'd';
-		dragonSymbol = 'D';
-		dragonSleepCharacterSymbol = 'f';
 	}
 	
 	public Logic(int dragonOptions) {
@@ -117,12 +138,12 @@ public class Logic {
 			// Check Dragon and Darts (Update Dragon symbol)
 			for (Dart dart : darts) {
 
-				if(sword.isActive() && !dragon.isDead()) {
+				if(dart.isActive() && !dragon.isDead()) {
 					if(dragon.samePosition(dart.getPosition()))
 						if(dragon.isSleeping())
-							dragon.setSymbol(dragonSleepCharacterSymbol);
+							dragon.setSymbol(dragonSleepDartSymbol);
 						else
-							dragon.setSymbol(dragonCharacterSymbol);
+							dragon.setSymbol(dragonDartSymbol);
 				}
 			}
 			
@@ -130,18 +151,18 @@ public class Logic {
 			if(shield.isActive() && !dragon.isDead()) {
 				if(dragon.samePosition(shield.getPosition()))
 					if(dragon.isSleeping())
-						dragon.setSymbol(dragonSleepCharacterSymbol);
+						dragon.setSymbol(dragonSleepShieldSymbol);
 					else
-						dragon.setSymbol(dragonCharacterSymbol);
+						dragon.setSymbol(dragonShieldSymbol);
 			}
 			
 			// Check Dragon and Sword (Update Dragon symbol)
 			if(sword.isActive() && !dragon.isDead()) {
 				if(dragon.samePosition(sword.getPosition()))
 					if(dragon.isSleeping())
-						dragon.setSymbol(dragonSleepCharacterSymbol);
+						dragon.setSymbol(dragonSleepSwordSymbol);
 					else
-						dragon.setSymbol(dragonCharacterSymbol);
+						dragon.setSymbol(dragonSwordSymbol);
 			}
 		}
 		
@@ -153,31 +174,31 @@ public class Logic {
 		//Place Dragon
 		
 		for(int j = 0; j<dragonNumber; j++) {
-			position = maze.placeCharacter(Helper.randInt(0, openSpaces-1));
+			position = maze.placeCharacter(Helper.randInt(1, openSpaces));
 			dragons.add(new Dragon(position[0], position[1]));
 			openSpaces--;
 		}
 		
 		//Place Sword
-		position = maze.placeCharacter(Helper.randInt(0, openSpaces-1));
+		position = maze.placeCharacter(Helper.randInt(1, openSpaces));
 		sword = new Sword(position[0], position[1]);
 		openSpaces--;
 		
 		//Place Shield
-		position = maze.placeCharacter(Helper.randInt(0, openSpaces-1));
+		position = maze.placeCharacter(Helper.randInt(1, openSpaces));
 		shield = new Shield(position[0], position[1]);
 		openSpaces--;
 		
 		// Place darts
 		for(int j = 0; j<dartNumber; j++) {
-			position = maze.placeCharacter(Helper.randInt(0, openSpaces-1));
+			position = maze.placeCharacter(Helper.randInt(1, openSpaces));
 			darts.add(new Dart(position[0], position[1]));
 			openSpaces--;
 		}
 		
 		// Place Hero (Attention Dragons)
 		while(true) {
-			position = maze.placeCharacter(Helper.randInt(0, openSpaces-1));
+			position = maze.placeCharacter(Helper.randInt(1, openSpaces));
 			
 			int dragonsOk = 0;
 			for (Dragon dragon : dragons) {
@@ -311,7 +332,7 @@ public class Logic {
 		if(hero.samePosition(x, y))
 			return true;
 		
-		return dragonFireHitHeroIteration(dragon, x+incrementX, y+incrementY, incrementX, incrementY, iteration++);
+		return dragonFireHitHeroIteration(dragon, x+incrementX, y+incrementY, incrementX, incrementY, iteration+1);
 	}
 
 	private boolean canMoveHeroPosition(int x, int y) {
@@ -401,13 +422,13 @@ public class Logic {
 	private void moveHero(char movement) {
 		int heroLocation[] = hero.getPosition();
 		
-		if(movement == 'a')
+		if(movement == MOVE_LEFT)
 			heroLocation[1]--;
-		else if(movement == 'd')
+		else if(movement == MOVE_RIGHT)
 			heroLocation[1]++;
-		else if(movement == 'w')
+		else if(movement == MOVE_UP)
 			heroLocation[0]--;
-		else if(movement == 's')
+		else if(movement == MOVE_DOWN)
 			heroLocation[0]++;		
 	
 		if(canMoveHeroPosition(heroLocation[0], heroLocation[1]))
@@ -421,16 +442,16 @@ public class Logic {
 			int directionY = 0;
 	
 			// left
-			if(movement == 'f')
+			if(movement == SHOOT_LEFT)
 				directionY = -1;
 			// right
-			else if(movement == 'h')
+			else if(movement == SHOOT_RIGHT)
 				directionY = 1;
 			// up
-			else if(movement == 't')
+			else if(movement == SHOOT_UP)
 				directionX = -1;
 			// down
-			else if(movement == 'g')
+			else if(movement == SHOOT_DOWN)
 				directionX = 1;
 			
 			if(directionX != 0 || directionY != 0) {
@@ -506,22 +527,6 @@ public class Logic {
 
 	public Shield getShield() {
 		return shield;
-	}
-
-	public char getDragonCharacterSymbol() {
-		return dragonCharacterSymbol;
-	}
-
-	public char getDragonSleepCharacterSymbol() {
-		return dragonSleepCharacterSymbol;
-	}
-
-	public char getDragonSleepSymbol() {
-		return dragonSleepSymbol;
-	}
-
-	public char getDragonSymbol() {
-		return dragonSymbol;
 	}
 }
 

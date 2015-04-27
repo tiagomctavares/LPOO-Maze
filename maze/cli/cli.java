@@ -88,10 +88,10 @@ public class cli {
 	private static int dragonNumber(Scanner keyboard) {
 		while(true) {
 			System.out.println("Amazing Maze");
-			System.out.print("Number of dragons (max 4)? ");
+			System.out.print("Number of dragons (max 9)? ");
 			
 			int numberDragons = keyboard.nextInt();
-			if(numberDragons >= 1 && numberDragons <= 4) {
+			if(numberDragons >= 1 && numberDragons <= 9) {
 				return numberDragons;
 			}
 		}
