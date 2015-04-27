@@ -1,5 +1,6 @@
 package gui;
 
+import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -26,6 +27,7 @@ public class MazeImages {
 			images.add(ImageIO.read(new File(resourcesFolder+"hero.png")));
 			
 			images.add(ImageIO.read(new File(resourcesFolder+"shield.png"))); //6
+			images.add(ImageIO.read(new File(resourcesFolder+"fire.png")));
 		} catch (IOException e) {
 			System.out.println("Error Loading Images");
 			System.exit(0);
@@ -103,5 +105,9 @@ public class MazeImages {
 			imagesToDraw.add(images.get(0));
 		
 		return imagesToDraw;
+	}
+
+	public Image fire() {
+		return images.get(7);
 	}
 }

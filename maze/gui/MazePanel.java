@@ -6,6 +6,7 @@ import java.awt.Graphics;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -17,15 +18,16 @@ public class MazePanel extends JPanel {
 	public static int cellSize = 50;
 	private MazeImages images;
 	private Logic game;
+	ArrayList<Integer[]> firePositions;
 	
 	private int rightKey = KeyEvent.VK_D;
 	private int downKey = KeyEvent.VK_S;
 	private int leftKey = KeyEvent.VK_A;
 	private int upKey = KeyEvent.VK_W;
 	
-	private int rightArrow = KeyEvent.VK_F;
+	private int rightArrow = KeyEvent.VK_H;
 	private int downArrow = KeyEvent.VK_G;
-	private int leftArrow = KeyEvent.VK_H;
+	private int leftArrow = KeyEvent.VK_F;
 	private int upArrow = KeyEvent.VK_T;
 
 	public MazePanel() {
@@ -42,6 +44,7 @@ public class MazePanel extends JPanel {
 		else
 			game = new Logic(GameConfig.size, GameConfig.numberDragons, GameConfig.numberDragons);
 		this.setSize(cellSize*GameConfig.size, cellSize*GameConfig.size);
+		firePositions = new ArrayList<Integer[]>();
 		repaint();
 	}
 
@@ -62,6 +65,11 @@ public class MazePanel extends JPanel {
 				for(BufferedImage image: images.get(map[i][j]))
 					g.drawImage(image, cellSize*j, cellSize*i, null);
 			}
+		}
+		
+		if(!firePositions.isEmpty()) {
+			for(Integer[] position : firePositions)
+				g.drawImage(images.fire(), cellSize*position[1], cellSize*position[0], null);
 		}
 		
 		g.setColor(Color.white);
@@ -92,6 +100,8 @@ public class MazePanel extends JPanel {
 				game.play(Logic.SHOOT_UP);
 			
 			if(game.gameEnded()) {
+				firePositions = game.getDragonBreath();
+				
 				repaint();
 				JOptionPane.showMessageDialog(null, game.getGameEndedMessage());
 				newGame();

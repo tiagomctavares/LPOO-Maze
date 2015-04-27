@@ -16,6 +16,7 @@ public class Logic {
 	private Sword sword;
 	private ArrayList<Dart> darts;
 	private Shield shield;
+	private Dragon dragonFire;
 	
 	// symbols
 	public static char heroSymbol = 'H';
@@ -117,7 +118,7 @@ public class Logic {
 				
 				if(!characterFound) {
 					
-					if(hero.samePosition(i, j) && (gameOverCode() == 0 || gameOverCode() == 1))
+					if(hero.samePosition(i, j) && (gameOverCode() != 2))
 						map[i][j] = hero.getSymbol();
 					else if(shield.samePosition(i, j) && shield.isActive())
 						map[i][j] = shield.getSymbol();
@@ -275,8 +276,10 @@ public class Logic {
 						if( !dragon.isDead() && !dragon.isSleeping())
 							dragonFireHitHero = dragonFireHitHero(dragon);
 					
-						if(dragonFireHitHero)
+						if(dragonFireHitHero) {
 							loseGame(3);
+							dragonFire = dragon;
+						}
 					}
 				}
 			}
@@ -310,13 +313,13 @@ public class Logic {
 			return true;
 
 
-		if(dragonFireHitHeroIteration(dragon, x, y+1, 0, 1, 1))
+		if(dragonFireHitHeroIteration(dragon, x, y, 0, 1, 0))
 			return true;
-		if(dragonFireHitHeroIteration(dragon, x, y-1, 0, -1, 1))
+		if(dragonFireHitHeroIteration(dragon, x, y, 0, -1, 0))
 			return true;
-		if(dragonFireHitHeroIteration(dragon, x+1, y, 1, 0, 1))
+		if(dragonFireHitHeroIteration(dragon, x, y, 1, 0, 0))
 			return true;
-		if(dragonFireHitHeroIteration(dragon, x-1, y, -1, 0, 1))
+		if(dragonFireHitHeroIteration(dragon, x, y, -1, 0, 0))
 			return true;
 		
 		return false;
@@ -348,6 +351,10 @@ public class Logic {
 		}else if (maze.map[x][y] == maze.exit && hero.isArmed()) {
 			winGame();
 		}
+		
+		if(maze.map[x][y] == maze.exit) {
+			return false;
+		}
 
 		for (Dart dart : darts) {
 			if(dart.samePosition(x, y) && dart.isActive()) {
@@ -360,7 +367,8 @@ public class Logic {
 	}
 
 	private void loseGame(int code) {
-		hero.setActive(false);
+		if(code == 2)
+			hero.setActive(false);
 		gameOver = code;
 	}
 
@@ -527,6 +535,52 @@ public class Logic {
 
 	public Shield getShield() {
 		return shield;
+	}
+
+	public Dragon getDragonFire() {
+		return dragonFire;
+	}
+	
+	public ArrayList<Integer[]> getDragonBreath() {
+		ArrayList<Integer[]> positions = new ArrayList<Integer[]>();
+		
+		if(gameOver == 3) {
+			Dragon dragon = getDragonFire();
+
+			int x = dragon.getX();
+			int y = dragon.getY();
+			if(hero.getX() != x) {
+				if(hero.getX() < x) {
+					for(int i = 1; i<=3; i++)
+						if(maze.map[x-i][y] != wallSymbol)
+							positions.add(new Integer[]{ x - i, y});
+						else
+							break;
+				} else {
+					for(int i = 1; i<=3; i++)
+						if(maze.map[dragon.getX()+i][y] != wallSymbol)
+							positions.add(new Integer[]{ x + i, y});
+						else
+							break;					
+				}
+			} else {
+				if(hero.getY() < dragon.getY()) {
+					for(int i = 1; i<=3; i++)
+						if(maze.map[x][y-i] != wallSymbol)
+							positions.add(new Integer[]{ x , y - i});
+						else
+							break;
+				} else {
+					for(int i = 1; i<=3; i++)
+						if(maze.map[x][y+i] != wallSymbol)
+							positions.add(new Integer[]{ x , y + i});
+						else
+							break;					
+				}
+			}
+		}
+		
+		return positions;		
 	}
 }
 
