@@ -42,8 +42,11 @@ public class MazePanel extends JPanel {
 		if( GameConfig.defaultMaze)
 			game = new Logic(GameConfig.dragonMovementState);
 		else
-			game = new Logic(GameConfig.size, GameConfig.numberDragons, GameConfig.numberDragons);
+			game = new Logic(GameConfig.size, GameConfig.dragonMovementState, GameConfig.numberDragons);
+		
+		
 		this.setSize(cellSize*GameConfig.size, cellSize*GameConfig.size);
+		
 		firePositions = new ArrayList<Integer[]>();
 		repaint();
 	}
@@ -101,7 +104,6 @@ public class MazePanel extends JPanel {
 			
 			if(game.gameEnded()) {
 				firePositions = game.getDragonBreath();
-				
 				repaint();
 				JOptionPane.showMessageDialog(null, game.getGameEndedMessage());
 				newGame();

@@ -350,6 +350,7 @@ public class Logic {
 			shield.setActive(false);
 		}else if (maze.map[x][y] == maze.exit && hero.isArmed()) {
 			winGame();
+			return true;
 		}
 		
 		if(maze.map[x][y] == maze.exit) {

@@ -72,6 +72,7 @@ public class GameFrame implements ActionListener {
 		JButton btnOptions = new JButton("Options");
 		btnOptions.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
+				options.init();
 				options.setVisible(true);
 			}
 		});

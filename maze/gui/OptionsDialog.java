@@ -38,12 +38,18 @@ public class OptionsDialog extends JDialog {
 		SetUpDragonSettingsSection();
 		SetUpGameControlsSection();
 		SetUpButtonsSection();
+		
+		init();
 
 		// Dialog Details
 		pack();
-		/*Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-		this.setLocation(dim.width / 2 - this.getSize().width / 2, dim.height
-				/ 2 - this.getSize().height / 2);*/
+	}
+	
+	public void init() {
+		mazeMode.setSelectedIndex(GameConfig.defaultMaze?0:1);
+		sizeSlider.setValue(GameConfig.size);
+		behaviorSelector.setSelectedIndex(GameConfig.dragonMovementState-1);
+		numDragonsSlider.setValue(GameConfig.numberDragons);
 	}
 
 	
@@ -79,7 +85,6 @@ public class OptionsDialog extends JDialog {
 		sizeSlider.setMajorTickSpacing(5);
 		sizeSlider.setMaximum(30);
 		sizeSlider.setMinimum(10);
-		sizeSlider.setValue(10);
 		mazeW.add(sizeSlider);
 		
 	}
@@ -101,7 +106,6 @@ public class OptionsDialog extends JDialog {
 		String[] behaviorStrings = { "Not Moving", "Moving",
 				"Moving and Sleeping" };
 		behaviorSelector = new JComboBox<Object>(behaviorStrings);
-		behaviorSelector.setSelectedIndex(0);
 		dragonsBehavior.add(behaviorSelector);
 
 		JPanel mazeW = new JPanel();
@@ -116,7 +120,7 @@ public class OptionsDialog extends JDialog {
 		numDragonsSlider.setMajorTickSpacing(4);
 		numDragonsSlider.setMaximum(9);
 		numDragonsSlider.setMinimum(1);
-		numDragonsSlider.setValue(1);
+		// numDragonsSlider.setValue(G);
 		mazeW.add(numDragonsSlider);
 	}
 	
