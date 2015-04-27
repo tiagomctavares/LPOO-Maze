@@ -3,6 +3,12 @@ package logic;
 import java.util.Arrays;
 import global.Helper;
 
+/**
+ * Class responsible for generating mazes and tell the logic where to place characters
+ * 
+ * @author Tiago Tavares
+ * 
+ */
 public class Maze {
 
 	public char empty;

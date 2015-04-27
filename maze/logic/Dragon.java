@@ -1,5 +1,11 @@
 package logic;
 
+/**
+ * Represents a Dragon Character
+ * 
+ * @author Tiago Tavares
+ * 
+ */
 public class Dragon extends Symbol {
 	private boolean sleep;
 

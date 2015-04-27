@@ -3,6 +3,12 @@ package logic;
 import java.util.Arrays;
 import java.util.Random;
 
+/**
+ * Helper class used for multiple operations
+ * 
+ * @author Tiago Tavares
+ * 
+ */
 public class Helper {
 
 	public static int randInt(int min, int max) {

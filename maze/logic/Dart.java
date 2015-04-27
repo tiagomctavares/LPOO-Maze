@@ -1,5 +1,11 @@
 package logic;
 
+/**
+ * Represents a Dart Character
+ * 
+ * @author Tiago Tavares
+ * 
+ */
 public class Dart extends Symbol {
 
 	public Dart(int x, int y) {

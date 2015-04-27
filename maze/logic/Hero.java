@@ -1,5 +1,11 @@
 package logic;
 
+/**
+ * Represents a Hero Character
+ * 
+ * @author Tiago Tavares
+ * 
+ */
 public class Hero extends Symbol {
 	private boolean armed = false;
 	private int dart = 0;

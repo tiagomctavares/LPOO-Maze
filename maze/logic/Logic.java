@@ -8,6 +8,12 @@ import java.util.ArrayList;
 //BIT 4 -> Armed
 //BIT 5 -> Dragon
 
+/**
+ * Represents a Game Logic.
+ * 
+ * @author Tiago Tavares
+ * 
+ */
 public class Logic {
 	// Elements
 	private Maze maze;
@@ -19,24 +25,73 @@ public class Logic {
 	private Dragon dragonFire;
 	
 	// symbols
+	/**
+	 * Hero char representation
+	 */
 	public static char heroSymbol = 'H';
+	/**
+	 * Hero with Sword char representation
+	 */
 	public static char heroSwordSymbol = 'A';
+	/**
+	 * Hero with Shield char representation
+	 */
 	public static char heroShieldSymbol = 'O';
+	/**
+	 * Hero with Shield and Sword char representation
+	 */
 	public static char heroSwordShieldSymbol = 'I';
-	
+
+	/**
+	 * Dragon char representation
+	 */
 	public static char dragonSymbol = 'D';
+	/**
+	 * Dragon sleeping char representation
+	 */
 	public static char dragonSleepSymbol = 'd';
+	/**
+	 * Dragon over Sword char representation
+	 */
 	public static char dragonSwordSymbol = 'F';
+	/**
+	 * Dragon sleeping over Sword char representation
+	 */
 	public static char dragonSleepSwordSymbol = 'f';
+	/**
+	 * Dragon over Shield char representation
+	 */
 	public static char dragonShieldSymbol = 'G';
+	/**
+	 * Dragon sleeping over Shield char representation
+	 */
 	public static char dragonSleepShieldSymbol = 'g';
+	/**
+	 * Dragon over Dart char representation
+	 */
 	public static char dragonDartSymbol = 'J';
+	/**
+	 * Dragon sleeping over Dart char representation
+	 */
 	public static char dragonSleepDartSymbol = 'j';
-	
+
+	/**
+	 * Sword char representation
+	 */
 	public static char swordSymbol = 'E';
+	/**
+	 * Shield char representation
+	 */
 	public static char shieldSymbol = 'P';
+
+	/**
+	 * Dart char representation
+	 */
 	public static char dartSymbol = 'T';
-	
+
+	/**
+	 * Wall char representation
+	 */
 	public static char wallSymbol = 'X';
 
 	// MOVEMENT
@@ -67,6 +122,12 @@ public class Logic {
 		messages = new GameMessages();
 	}
 	
+	/**
+	 * Constructs and initializes game Logic for default maze
+	 * 
+	 * @param dragonOptions
+	 *			the Dragon movement option for default Maze
+	 */	
 	public Logic(int dragonOptions) {
 		init();
 		this.dragonOptions = dragonOptions;
@@ -79,7 +140,17 @@ public class Logic {
 		dragons.add(new Dragon(3, 1));
 		darts.add(new Dart(1, 2));
 	}
-	
+
+	/**
+	 * Constructs and initializes game Logic for random maze
+	 * 
+	 * @param mapSize
+	 * 			the maze Width and Height
+	 * @param dragonOptions
+	 *			the Dragon movement option
+	 * @param dragonNumber
+	 * 			the number of Dragons to spawn
+	 */
 	public Logic(int mapSize, int dragonOptions, int dragonNumber) {
 		init();
 		this.dragonOptions = dragonOptions;
@@ -91,6 +162,12 @@ public class Logic {
 		refreshSymbols();
 	}
 
+
+	/**
+	 * Returns the map represented by an array of chars
+	 * 
+	 * @return <code>char[][]</code> representation of the map
+	 */
 	public char[][] getMap() {
 		char[][] map = Helper.deepCopy(maze.map);
 		
@@ -219,6 +296,14 @@ public class Logic {
 		
 	}
 
+
+	/**
+	 * Order from the interface to play a turn
+	 * 
+	 * @param movement
+	 * 			the movement action character
+	 * 
+	 */
 	public void play(char movement) {
 		moveHero(movement);
 		useDart(movement);
@@ -235,12 +320,22 @@ public class Logic {
 		refreshCharacters();
 	}
 	
+	/**
+	 * Returns if the game has ended
+	 * 
+	 * @return <code>true</code> if the game has ended.
+	 */
 	public boolean gameEnded() {
 		if(gameOver == 0)
 			return false;
 		return true;
 	}
 	
+	/**
+	 * Returns the code of end game
+	 * 
+	 * @return this game over state.
+	 */
 	public int gameOverCode() {
 		return gameOver;
 	}
@@ -483,11 +578,21 @@ public class Logic {
 
 		dartIteration(directionX, directionY, i+directionX, j+directionY);
 	}
-
+	
+	/**
+	 * Returns the number of darts in hero backpack
+	 * 
+	 * @return hero number of darts
+	 */
 	public int heroDarts() {
 		return hero.getDarts();
 	}
 
+	/**
+	 * Returns the message to show the user at the end of the game
+	 * 
+	 * @return the message to be shown
+	 */
 	public String getGameEndedMessage() {
 		// Win
 		if(gameOverCode() == 1)
@@ -502,6 +607,11 @@ public class Logic {
 		return "";
 	}
 
+	/**
+	 * Returns the message to show the user at the end of the turn
+	 * 
+	 * @return the message to be shown
+	 */
 	public String getGameMessage() {
 
 		
@@ -514,34 +624,65 @@ public class Logic {
 		
 	}
 
-	public Maze getMaze() {
-		return maze;
-	}
-
+	/**
+	 * Returns an arrayList of the Dragons used in UnitTest
+	 * 
+	 * @return array list with the dragons in the map
+	 */
 	public ArrayList<Dragon> getDragons() {
 		return dragons;
 	}
 
+	/**
+	 * Return the Hero in the map used in UnitTest
+	 * 
+	 * @return Hero present in the map
+	 */
 	public Hero getHero() {
 		return hero;
 	}
 
+	/**
+	 * Return the Hero in the map used in UnitTest
+	 * 
+	 * @return Sword present in the map
+	 */
 	public Sword getSword() {
 		return sword;
 	}
-
+	
+	/**
+	 * Returns an arrayList of the Darts used in UnitTest
+	 * 
+	 * @return array list with the darts in the map
+	 */
 	public ArrayList<Dart> getDarts() {
 		return darts;
 	}
 
+	/**
+	 * Return the Shield in the map used in UnitTest
+	 * 
+	 * @return Shield present in the map
+	 */
 	public Shield getShield() {
 		return shield;
 	}
 
+	/**
+	 * Returns the Dragon that killed the Hero
+	 * 
+	 * @return Dragon that killed hero
+	 */
 	public Dragon getDragonFire() {
 		return dragonFire;
 	}
-	
+
+	/**
+	 * Finds the positions that the dragon launched fire to kill the Hero
+	 * 
+	 * @return arrayList with x, y position of the fire
+	 */
 	public ArrayList<Integer[]> getDragonBreath() {
 		ArrayList<Integer[]> positions = new ArrayList<Integer[]>();
 		

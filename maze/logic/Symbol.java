@@ -2,6 +2,12 @@ package logic;
 
 import java.util.Arrays;
 
+/**
+ * Abstract Class, represents a Character/Symbol (Extended by all Characters)
+ * 
+ * @author Tiago Tavares
+ * 
+ */
 public abstract class Symbol {
 	private char symbol;
 	private int[] position = {0, 0};

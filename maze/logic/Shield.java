@@ -1,5 +1,11 @@
 package logic;
 
+/**
+ * Represents a Shield Character
+ * 
+ * @author Tiago Tavares
+ * 
+ */
 public class Shield extends Symbol {
 
 	public Shield(int x, int y) {

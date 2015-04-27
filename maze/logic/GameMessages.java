@@ -2,6 +2,12 @@ package logic;
 
 import java.util.ArrayList;
 
+/**
+ * Represents the messages to be show by turn or in the end of the game
+ * 
+ * @author Tiago Tavares
+ * 
+ */
 public class GameMessages {
 	ArrayList<String> playMessages;
 	ArrayList<String> endMessages;

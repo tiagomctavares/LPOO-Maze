@@ -1,5 +1,11 @@
 package logic;
 
+/**
+ * Represents a Sword Character
+ * 
+ * @author Tiago Tavares
+ * 
+ */
 public class Sword extends Symbol {
 
 	public Sword(int x, int y) {
